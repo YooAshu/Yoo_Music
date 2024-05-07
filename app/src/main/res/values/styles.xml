@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/white1</item>
+        <item name="android:width">40dp</item>
+        <item name="android:height">40dp</item>
+    </style>
+    <style name="roundedCornerShape">
+        <item name="cornerFamily">rounded</item>
+
+        <item name="cornerSize">20dp</item>
+
+        <!-- Adjust the corner size as needed -->
+    </style>
+    <style name="roundedCornerShapeTesting">
+        <item name="cornerFamily">rounded</item>
+
+        <item name="cornerSizeBottomLeft">40dp</item>
+        <item name="cornerSizeBottomRight">40dp</item>
+        <!-- Adjust the corner size as needed -->
+    </style>
+    <style name="roundedCornerShapeMusicItem">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">5dp</item> <!-- Adjust the corner size as needed -->
+    </style>
+
+</resources>
