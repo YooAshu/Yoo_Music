@@ -28,6 +28,7 @@ class NotificationReceiver : BroadcastReceiver() {
         MusicPlayer.musicService!!.mediaPlayer!!.start()
         MusicPlayer.musicService!!.showNotification(R.drawable.pause_svgrepo_com)
         MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
 
     }
 
@@ -36,6 +37,7 @@ class NotificationReceiver : BroadcastReceiver() {
         MusicPlayer.musicService!!.mediaPlayer!!.pause()
         MusicPlayer.musicService!!.showNotification(R.drawable.play_svgrepo_com)
         MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
 
     }
 
@@ -48,6 +50,7 @@ class NotificationReceiver : BroadcastReceiver() {
             }
 
         updateMusicPlayerActivityLayout(context)
+        updateNowPlayingFragment(context)
         if (MusicPlayer.isPlaying) {
             MusicPlayer.musicService!!.createMediaPlayer(playState = true)
         } else {
@@ -64,6 +67,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
 
         updateMusicPlayerActivityLayout(context)
+        updateNowPlayingFragment(context)
         if (MusicPlayer.isPlaying) {
             MusicPlayer.musicService!!.createMediaPlayer(playState = true)
         } else {
@@ -76,13 +80,21 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun updateMusicPlayerActivityLayout(context: Context){
         Glide.with(context)
             .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
-            .apply(RequestOptions().placeholder(R.drawable.music_placeholder).centerCrop())
+            .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
             .into(MusicPlayer.binding.musicPlayerImg)
         MusicPlayer.binding.musicPlayerTitle.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
         MusicPlayer.binding.musicPlayerAlbum.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].artist
         MusicPlayer.binding.songDuration.text = formatDuration(MusicPlayer.musicListPA[MusicPlayer.songPosition].duration)
 
         MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+    }
+    private fun updateNowPlayingFragment(context: Context){
+        Glide.with(context)
+            .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
+            .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
+            .into(NowPlaying.binding.imageNP)
+
+        NowPlaying.binding.nameNP.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
     }
 
 }

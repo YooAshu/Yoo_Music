@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".NowPlaying"
+    android:layout_marginBottom="35dp"
+    android:paddingBottom="35dp"
+    android:background="@drawable/white_bg_now_playing">
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imageNP"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_margin="10dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        app:shapeAppearanceOverlay="@style/roundedCornerShapeNP"
+        android:src="@drawable/artboard_2" />
+
+    <TextView
+        android:id="@+id/nameNP"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:layout_marginVertical="10dp"
+        android:text="@string/song_name"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/imageNP"
+        android:layout_toStartOf="@+id/playPauseNP"
+        android:textColor="@color/black"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:padding="10dp"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        />
+
+
+
+    <ImageButton
+        android:id="@+id/playPauseNP"
+        android:layout_width="30dp"
+        android:layout_height="45dp"
+        android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:gravity="center_vertical"
+        android:background="@android:color/transparent"
+        android:layout_alignParentTop="true"
+       android:layout_toStartOf="@+id/nextNP"
+        android:src="@drawable/play_np" />
+
+    <ImageButton
+        android:id="@+id/nextNP"
+        android:layout_width="30dp"
+        android:layout_height="45dp"
+        android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:gravity="center_vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/transparent"
+        android:src="@drawable/next_np" />
+
+
+</RelativeLayout>

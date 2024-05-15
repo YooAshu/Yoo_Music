@@ -22,6 +22,9 @@
     <style name="roundedCornerShapeMusicItem">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">5dp</item> <!-- Adjust the corner size as needed -->
+    </style><style name="roundedCornerShapeNP">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">15dp</item> <!-- Adjust the corner size as needed -->
     </style>
 
 </resources>

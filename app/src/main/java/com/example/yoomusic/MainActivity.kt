@@ -73,7 +73,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.playlist -> {
-                    replaceFragment(playListFragment())
+//                    replaceFragment(playListFragment())
+                    val intent = Intent(this,MusicPlayer::class.java)
+                    startActivity(intent)
                     true
                 }
 
@@ -87,11 +89,15 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+//        ,,
+        supportFragmentManager.beginTransaction().replace(R.id.nowPlaying, NowPlaying()).commit()
+
+
 
     }
 
 
-    fun replaceFragment(fragment: Fragment) {
+    private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.frame_container, fragment).commit()
 
     }

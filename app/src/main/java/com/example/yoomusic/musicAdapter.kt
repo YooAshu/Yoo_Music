@@ -1,5 +1,6 @@
 package com.example.yoomusic
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -44,7 +45,7 @@ class MusicAdapter(private val context:Context,private var musicList:ArrayList<M
 
             when{
                 searchFragment.search -> sendIntent("searchAdapter",position)
-
+                musicList[position].id == MusicPlayer.nowPlayingId -> sendIntent("NowPlaying",MusicPlayer.songPosition)
                 else->sendIntent("MusicAdapter",position)
             }
 
@@ -57,6 +58,7 @@ class MusicAdapter(private val context:Context,private var musicList:ArrayList<M
         return musicList.size
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateMusicList(searchList: ArrayList<Music>) {
         musicList = ArrayList()
         musicList.addAll(searchList)

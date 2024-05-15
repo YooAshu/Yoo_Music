@@ -7,17 +7,15 @@ import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.yoomusic.databinding.ActivityMusicPlayerBinding
-import kotlin.random.Random
-import kotlin.system.exitProcess
-import kotlin.time.Duration
 
 class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompletionListener {
 
@@ -34,6 +32,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
         var musicService: MusicService? = null
         @SuppressLint("StaticFieldLeak")
         lateinit var binding: ActivityMusicPlayerBinding
+        var nowPlayingId: String = ""
     }
 
 
@@ -45,9 +44,9 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
         binding = ActivityMusicPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        var intent = Intent(this, MusicService::class.java)
-        bindService(intent, this, BIND_AUTO_CREATE)
-        startService(intent)
+//        var intent = Intent(this, MusicService::class.java)
+//        bindService(intent, this, BIND_AUTO_CREATE)
+//        startService(intent)
 
         binding.marqueeText.isSelected = true
 //        binding.musicPlayerTitle.isSelected = true
@@ -155,9 +154,12 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
             }
 
             binding.currentDuration.text = formatDuration(musicService!!.mediaPlayer!!.currentPosition.toLong())
+            binding.songDuration.text = formatDuration(musicListPA[songPosition].duration)
             binding.seekBar.progress =0
             binding.seekBar.max = musicService!!.mediaPlayer!!.duration
+            nowPlayingId = musicListPA[songPosition].id
             musicService!!.mediaPlayer!!.setOnCompletionListener(this)
+
 
 
 
@@ -170,15 +172,16 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
     private fun updateLayout() {
         binding.musicPlayerTitle.text = musicListPA[songPosition].title
         binding.musicPlayerAlbum.text = musicListPA[songPosition].artist
-        binding.songDuration.text = formatDuration(musicListPA[songPosition].duration)
-
         binding.marqueeText.text = musicListPA[songPosition].title
         Glide.with(this)
             .load(musicListPA[songPosition].artUri)
             .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
             .into(binding.musicPlayerImg)
 
+
+
     }
+
 
 
 //    check here for shuffle problrm
@@ -187,6 +190,10 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
 
         when (intent.getStringExtra("class")) {
             "MusicAdapter" -> {
+                val intent = Intent(this, MusicService::class.java)
+                bindService(intent, this, BIND_AUTO_CREATE)
+                startService(intent)
+
                 musicListPA = ArrayList()
                 musicListPA.addAll(HomeFragment.musicListHome)
 
@@ -199,6 +206,10 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
                 updateLayout()
             }
             "HomeFragment" -> {
+                val intent = Intent(this, MusicService::class.java)
+                bindService(intent, this, BIND_AUTO_CREATE)
+                startService(intent)
+
                 musicListPA = ArrayList()
                 musicListPA.addAll(HomeFragment.musicListHome)
                 musicListPA.shuffle()
@@ -208,6 +219,10 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
             }
 
             "searchAdapter"->{
+                val intent = Intent(this, MusicService::class.java)
+                bindService(intent, this, BIND_AUTO_CREATE)
+                startService(intent)
+
                 musicListPA = ArrayList()
                 musicListPA.addAll(searchFragment.searchItemList)
                 if(shuffle){
@@ -218,22 +233,41 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
                 }
                 updateLayout()
             }
+
+            "NowPlaying"->{
+
+//                var intent = Intent(this, MusicService::class.java)
+//                bindService(intent, this, BIND_AUTO_CREATE)
+//                startService(intent)
+                binding.currentDuration.text = formatDuration(musicService!!.mediaPlayer!!.currentPosition.toLong())
+                binding.songDuration.text = formatDuration(musicService!!.mediaPlayer!!.duration.toLong())
+                binding.seekBar.progress = musicService!!.mediaPlayer!!.currentPosition
+                binding.seekBar.max = musicService!!.mediaPlayer!!.duration
+                if(isPlaying){
+                    binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+                }else{
+                    binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+                }
+                updateLayout()
+            }
         }
     }
 
     private fun playMusic() {
 
+        musicService!!.mediaPlayer!!.start()
         isPlaying = true
         binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
-        musicService!!.mediaPlayer!!.start()
         musicService!!.showNotification(R.drawable.pause_svgrepo_com)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
     }
 
     private fun pauseMusic() {
+        musicService!!.mediaPlayer!!.pause()
         isPlaying = false
         binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
-        musicService!!.mediaPlayer!!.pause()
         musicService!!.showNotification(R.drawable.play_svgrepo_com)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
     }
 
     private fun playNextMusic() {
@@ -299,7 +333,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        var binder = service as MusicService.MyBinder
+        val binder = service as MusicService.MyBinder
         musicService = binder.currentService()
         createMediaPlayer(playState = true)
         musicService!!.seekBarSetup()
@@ -320,18 +354,38 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
             }
         }
 
-
-
         createMediaPlayer(playState = true)
         try {
-            updateLayout()
-        }catch (e:Exception){return}
+//            updateLayout()
+            binding.musicPlayerTitle.text = musicListPA[songPosition].title
+            binding.musicPlayerAlbum.text = musicListPA[songPosition].artist
+            binding.marqueeText.text = musicListPA[songPosition].title
+
+            Glide.with(baseContext)
+                    .load(musicListPA[songPosition].artUri)
+                    .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
+                    .into(binding.musicPlayerImg)
+
+//            NowPlaying().updateNP()
+            Glide.with(baseContext)
+                .load(musicListPA[songPosition].artUri)
+                .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
+                .into(NowPlaying.binding.imageNP)
+
+            NowPlaying.binding.nameNP.text = musicListPA[songPosition].title
+
+
+
+        }catch (e:Exception){
+            Log.d("Error",e.toString())
+            return}
 
 
 
     }
 
-    fun findIndexOfObjectWithValue(objects: ArrayList<Music>, id: String): Int {
+
+    private fun findIndexOfObjectWithValue(objects: ArrayList<Music>, id: String): Int {
         for (i in objects.indices) {
             if (objects[i].id == id) {
                 return i
@@ -341,6 +395,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
         return 0 // Value not found
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(resultCode==13 || resultCode == RESULT_OK)
