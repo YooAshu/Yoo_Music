@@ -20,6 +20,8 @@
     <string name="share_btn">share song</string>
     <string name="add_to_list">add song to playlist</string>
     <string name="sort">sort songs</string>
+    <string name="library">Your Library</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

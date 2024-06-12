@@ -57,6 +57,8 @@ class searchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
+        MainActivity.bottomNavigationView.menu.getItem(1).isChecked = true
+
         if (!functionCalled) {
             // Perform some initialization here
             loadMusicList()
@@ -93,6 +95,7 @@ class searchFragment : Fragment() {
 
 //        musicListSearch = HomeFragment().getAllAudio()
         search = false
+        favourite.isClicked = false
         searchItemList = ArrayList()
 
         binding.searchRV.setHasFixedSize(true)

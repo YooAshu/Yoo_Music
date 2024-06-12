@@ -63,6 +63,8 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
+        MainActivity.bottomNavigationView.menu.getItem(0).isChecked = true
+
         if (!MainActivity.homeCreated) {
             // Perform some initialization here
             musicListHome = getAllAudio()
@@ -72,13 +74,12 @@ class HomeFragment : Fragment() {
         loadMusicList()
 
 
-           binding.shuffleHome.setOnClickListener {
-               val intent = Intent(requireContext(), MusicPlayer::class.java)
-               intent.putExtra("index",0)
-               intent.putExtra("class","HomeFragment")
-               startActivity(intent)
-           }
-
+        binding.shuffleHome.setOnClickListener {
+            val intent = Intent(requireContext(), MusicPlayer::class.java)
+            intent.putExtra("index", 0)
+            intent.putExtra("class", "HomeFragment")
+            startActivity(intent)
+        }
 
 
     }
@@ -103,11 +104,12 @@ class HomeFragment : Fragment() {
                 }
             }
 
-        lateinit var musicListHome :ArrayList<Music>
+        lateinit var musicListHome: ArrayList<Music>
     }
 
-    private fun loadMusicList(){
+    private fun loadMusicList() {
         searchFragment.search = false
+        favourite.isClicked = false
 //        musicListHome = getAllAudio()
 
         binding.homeRV.setHasFixedSize(true)
@@ -116,15 +118,16 @@ class HomeFragment : Fragment() {
         musicAdapter = MusicAdapter(requireContext(), musicListHome)
         binding.homeRV.adapter = musicAdapter
 //        binding.totalSongCount.text =  musicAdapter.itemCount + "Total Songs : "
-        binding.totalSongCount.text =  "${musicAdapter.itemCount} Songs"
+        binding.totalSongCount.text = "${musicAdapter.itemCount} Songs"
 
 
     }
 
     @SuppressLint("Range")
-     fun getAllAudio():ArrayList<Music>{
+    fun getAllAudio(): ArrayList<Music> {
         val tempList = ArrayList<Music>()
-        val selection = MediaStore.Audio.Media.IS_MUSIC + "!=0"
+//        val selection = MediaStore.Audio.Media.IS_MUSIC + "!=0"
+//        val selection = "${MediaStore.Audio.Media.DATA} NOT LIKE ? AND ${MediaStore.Audio.Media.IS_MUSIC}!=0"
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -133,35 +136,68 @@ class HomeFragment : Fragment() {
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATE_ADDED,
             MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.ALBUM_ID)
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.MIME_TYPE
+        )
 
-        val cursor = requireContext().contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,selection,null,
-            MediaStore.Audio.Media.DATE_ADDED + " DESC",null)
+        val selection = """
+    ${MediaStore.Audio.Media.DATA} NOT LIKE ? 
+    AND ${MediaStore.Audio.Media.IS_MUSIC} != 0
+    AND ${MediaStore.Audio.Media.TITLE} NOT LIKE 'AUD%'
+    AND ${MediaStore.Audio.Media.TITLE} NOT LIKE 'PTT%'
+""".trimIndent()
 
-        if (cursor!=null){
-            if (cursor.moveToFirst()){
+        val selectionArgs = arrayOf("%WhatsApp/Audio%")
+
+        val cursor = requireContext().contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            MediaStore.Audio.Media.DATE_ADDED + " DESC",
+
+            )
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
                 do {
-                    val titleC = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val titleC =
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                     val idC = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
-                    val albumC = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
-                    val artistC = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    val albumC =
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
+                    val artistC =
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                     val pathC = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                    val durationC = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+                    val durationC =
+                        cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
 
-                    val albumIdC = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)).toString()
+                    val albumIdC =
+                        cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+                            .toString()
                     val uri = Uri.parse("content://media/external/audio/albumart")
-                    val artUriC = Uri.withAppendedPath(uri,albumIdC).toString()
+                    if (uri == null) {
+                        Log.d("HomeFragment", "Uri is null")
+                    }
+                    val artUriC = Uri.withAppendedPath(uri, albumIdC).toString()
 
-                    val music = Music(id = idC,title = titleC,album = albumC,artist = artistC,path = pathC,duration = durationC, artUri = artUriC)
+                    val music = Music(
+                        id = idC,
+                        title = titleC,
+                        album = albumC,
+                        artist = artistC,
+                        path = pathC,
+                        duration = durationC,
+                        artUri = artUriC
+                    )
 
                     val file = File(music.path)
-                    if (file.exists()){
+                    if (file.exists()) {
                         tempList.add(music)
                     }
 
 
-                }while (cursor.moveToNext())
+                } while (cursor.moveToNext())
                 cursor.close()
 
             }

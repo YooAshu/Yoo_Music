@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.yoomusic.databinding.ActivityMusicPlayerBinding
+import com.google.gson.GsonBuilder
 
 class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompletionListener {
 
@@ -33,6 +34,9 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
         @SuppressLint("StaticFieldLeak")
         lateinit var binding: ActivityMusicPlayerBinding
         var nowPlayingId: String = ""
+        var isFav = false
+        var fvtIndex : Int = -1
+
     }
 
 
@@ -131,6 +135,25 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
        }
 
 
+      binding.fvtPlayerBtn.setOnClickListener {
+          if(isFav){
+              isFav = false
+              binding.fvtPlayerBtn.setImageResource(R.drawable.add_fvt_btn)
+              favourite.fvtItemList.removeAt(fvtIndex)
+          }
+          else{
+              isFav = true
+              binding.fvtPlayerBtn.setImageResource(R.drawable.add_fav_btn_selected)
+              favourite.fvtItemList.add(musicListPA[songPosition])
+
+          }
+          //to store fvt data
+          val editor = getSharedPreferences("FAVOURITES", MODE_PRIVATE).edit()
+          val jsonString = GsonBuilder().create().toJson(favourite.fvtItemList)
+          editor.putString("fvtSongs", jsonString)
+          editor.apply()
+      }
+
         updateShuffleButton()
         updateRepeatButton()
     }
@@ -170,6 +193,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
     }
 
     private fun updateLayout() {
+        fvtIndex = fvtChecker(musicListPA[songPosition].id)
         binding.musicPlayerTitle.text = musicListPA[songPosition].title
         binding.musicPlayerAlbum.text = musicListPA[songPosition].artist
         binding.marqueeText.text = musicListPA[songPosition].title
@@ -178,6 +202,12 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
             .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
             .into(binding.musicPlayerImg)
 
+        if(isFav){
+            binding.fvtPlayerBtn.setImageResource(R.drawable.add_fav_btn_selected)
+        }
+        else{
+            binding.fvtPlayerBtn.setImageResource(R.drawable.add_fvt_btn)
+        }
 
 
     }
@@ -225,6 +255,22 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
 
                 musicListPA = ArrayList()
                 musicListPA.addAll(searchFragment.searchItemList)
+                if(shuffle){
+                    songId = musicListPA[songPosition].id
+                    musicListPA.shuffle()
+                    songPosition = findIndexOfObjectWithValue(musicListPA, songId)
+
+                }
+                updateLayout()
+            }
+
+            "FavouriteAdapter"->{
+                val intent = Intent(this, MusicService::class.java)
+                bindService(intent, this, BIND_AUTO_CREATE)
+                startService(intent)
+
+                musicListPA = ArrayList()
+                musicListPA.addAll(favourite.fvtItemList)
                 if(shuffle){
                     songId = musicListPA[songPosition].id
                     musicListPA.shuffle()
@@ -402,5 +448,13 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
             return
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        //to store fvt data
+//        val editor = getSharedPreferences("FAVOURITES", MODE_PRIVATE).edit()
+//        val jsonString = GsonBuilder().create().toJson(favourite.fvtItemList)
+//        editor.putString("fvtSongs", jsonString)
+//        editor.apply()
+    }
 
 }

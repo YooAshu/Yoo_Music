@@ -28,3 +28,16 @@ fun getImageArt(path:String): ByteArray? {
     retriver.setDataSource(path)
     return retriver.embeddedPicture
 }
+
+fun fvtChecker(id: String) : Int{
+    MusicPlayer.isFav = false
+
+    favourite.fvtItemList.forEachIndexed { index, music ->
+        if (id==music.id){
+            MusicPlayer.isFav = true
+            return index
+        }
+
+    }
+    return -1
+}

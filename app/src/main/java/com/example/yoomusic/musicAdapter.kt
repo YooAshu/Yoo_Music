@@ -44,8 +44,10 @@ class MusicAdapter(private val context:Context,private var musicList:ArrayList<M
 //            manager.beginTransaction().replace(R.id.frame_container, musicPlayerFragment()).commit()
 
             when{
-                searchFragment.search -> sendIntent("searchAdapter",position)
                 musicList[position].id == MusicPlayer.nowPlayingId -> sendIntent("NowPlaying",MusicPlayer.songPosition)
+                searchFragment.search -> sendIntent("searchAdapter",position)
+                favourite.isClicked -> sendIntent("FavouriteAdapter",position)
+
                 else->sendIntent("MusicAdapter",position)
             }
 

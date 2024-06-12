@@ -12,10 +12,6 @@
         android:id="@+id/playlist"
         android:icon="@drawable/playlist_icon"
         android:title="@string/playlist_btn"/>
-    <item
-        android:id="@+id/fvt"
-        android:icon="@drawable/fvt_icon"
-        
-        android:title="@string/fvt_btn"/>
+
 
 </menu>

@@ -78,6 +78,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
 
     private fun updateMusicPlayerActivityLayout(context: Context){
+        MusicPlayer.fvtIndex = fvtChecker(MusicPlayer.musicListPA[MusicPlayer.songPosition].id)
         Glide.with(context)
             .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
             .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
@@ -87,6 +88,13 @@ class NotificationReceiver : BroadcastReceiver() {
         MusicPlayer.binding.songDuration.text = formatDuration(MusicPlayer.musicListPA[MusicPlayer.songPosition].duration)
 
         MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+
+        if(MusicPlayer.isFav){
+            MusicPlayer.binding.fvtPlayerBtn.setImageResource(R.drawable.add_fav_btn_selected)
+        }
+        else{
+            MusicPlayer.binding.fvtPlayerBtn.setImageResource(R.drawable.add_fvt_btn)
+        }
     }
     private fun updateNowPlayingFragment(context: Context){
         Glide.with(context)

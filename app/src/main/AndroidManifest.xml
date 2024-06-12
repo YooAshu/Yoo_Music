@@ -16,7 +16,6 @@
     <application
         android:name=".Application"
         android:allowBackup="true"
-
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -26,25 +25,31 @@
         android:theme="@style/splash_screen"
         tools:targetApi="31">
         <activity
-            android:name=".MusicPlayer"
+            android:name=".favourites"
             android:exported="false" />
-
+        <activity
+            android:name=".MusicPlayer"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".MusicService"
             android:exported="true"
-            android:foregroundServiceType="mediaPlayback"
-            />
-        <receiver android:name=".NotificationReceiver"
-            android:enabled="true"/>
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".NotificationReceiver"
+            android:enabled="true" />
     </application>
 
 </manifest>
