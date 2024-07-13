@@ -89,9 +89,9 @@
                         android:text="@string/All_Songs" />
 
                     <ImageButton
-                        android:id="@+id/imageButton3"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:id="@+id/sortbyHome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_marginHorizontal="10dp"
                         android:background="@android:color/transparent"

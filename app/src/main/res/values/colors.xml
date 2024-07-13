@@ -8,4 +8,5 @@
     <color name="grad1">#FF29C3</color>
     <color name="grad2">#9D00FF</color>
     <color name="grad3">#5200D6</color>
+    <color name="dialog_icon">#C6C6C6</color>
 </resources>

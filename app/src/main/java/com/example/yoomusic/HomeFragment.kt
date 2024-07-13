@@ -1,25 +1,33 @@
 package com.example.yoomusic
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.hardware.biometrics.BiometricManager.Strings
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yoomusic.databinding.ActivityMainBinding
 import com.example.yoomusic.databinding.FragmentHomeBinding
+import com.google.gson.GsonBuilder
 import java.io.File
 import kotlin.math.log
 
@@ -33,7 +41,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [HomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -81,6 +89,10 @@ class HomeFragment : Fragment() {
             startActivity(intent)
         }
 
+        binding.sortbyHome.setOnClickListener {
+            showbottomDialog()
+        }
+
 
     }
 
@@ -105,6 +117,7 @@ class HomeFragment : Fragment() {
             }
 
         lateinit var musicListHome: ArrayList<Music>
+        var sortingOrder: Int = 1
     }
 
     private fun loadMusicList() {
@@ -115,7 +128,7 @@ class HomeFragment : Fragment() {
         binding.homeRV.setHasFixedSize(true)
         binding.homeRV.setItemViewCacheSize(13)
         binding.homeRV.layoutManager = LinearLayoutManager(requireContext())
-        musicAdapter = MusicAdapter(requireContext(), musicListHome)
+        musicAdapter = MusicAdapter(requireContext(), musicListHome, listener = this)
         binding.homeRV.adapter = musicAdapter
 //        binding.totalSongCount.text =  musicAdapter.itemCount + "Total Songs : "
         binding.totalSongCount.text = "${musicAdapter.itemCount} Songs"
@@ -181,6 +194,7 @@ class HomeFragment : Fragment() {
                     }
                     val artUriC = Uri.withAppendedPath(uri, albumIdC).toString()
 
+                    val dateAddedC = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED))
                     val music = Music(
                         id = idC,
                         title = titleC,
@@ -188,7 +202,8 @@ class HomeFragment : Fragment() {
                         artist = artistC,
                         path = pathC,
                         duration = durationC,
-                        artUri = artUriC
+                        artUri = artUriC,
+                        dateAdded = dateAddedC
                     )
 
                     val file = File(music.path)
@@ -202,6 +217,82 @@ class HomeFragment : Fragment() {
 
             }
         }
+        if(sortingOrder==0){
+            tempList.sortBy { it.title.lowercase() }
+
+        }
+        else if(sortingOrder==2){
+            tempList.sortBy { it.dateAdded }
+        }
         return tempList
+    }
+
+    override fun onItemClicked(position: Int) {
+        TODO("Not yet implemented")
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun showbottomDialog(){
+
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.sortby_option_dialogue)
+
+
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.attributes?.windowAnimations = R.style.bottomDialogAnimation
+        dialog.window?.setGravity(Gravity.BOTTOM)
+        dialog.show()
+
+        val editor = requireActivity().getSharedPreferences("SORTING", AppCompatActivity.MODE_PRIVATE).edit()
+
+        dialog.findViewById<RelativeLayout>(R.id.by_name).setOnClickListener {
+            if(musicListHome.isNotEmpty() && sortingOrder !=0) {
+
+                sortingOrder = 0
+                musicListHome.sortBy { it.title.lowercase() }
+                musicAdapter.notifyDataSetChanged()
+
+                val jsonString = GsonBuilder().create().toJson(0)
+                editor.putString("mainList", jsonString)
+                editor.apply()
+            }
+
+            dialog.dismiss()
+        }
+        dialog.findViewById<RelativeLayout>(R.id.by_new_first).setOnClickListener {
+
+            if(musicListHome.isNotEmpty() && sortingOrder !=1) {
+                sortingOrder = 1
+                musicListHome.sortByDescending { it.dateAdded }
+                musicAdapter.notifyDataSetChanged()
+
+                val jsonString = GsonBuilder().create().toJson(1)
+                editor.putString("mainList", jsonString)
+                editor.apply()
+            }
+
+
+            dialog.dismiss()
+        }
+        dialog.findViewById<RelativeLayout>(R.id.by_old_first).setOnClickListener {
+
+
+            if(musicListHome.isNotEmpty() && sortingOrder !=2) {
+                sortingOrder = 2
+                musicListHome.sortBy { it.dateAdded }
+                musicAdapter.notifyDataSetChanged()
+
+                val jsonString = GsonBuilder().create().toJson(2)
+                editor.putString("mainList", jsonString)
+                editor.apply()
+            }
+
+            dialog.dismiss()
+        }
+
+
     }
 }

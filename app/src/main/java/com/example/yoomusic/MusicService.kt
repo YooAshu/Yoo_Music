@@ -2,6 +2,7 @@ package com.example.yoomusic
 
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.graphics.BitmapFactory
@@ -11,9 +12,13 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlin.system.exitProcess
 
 class MusicService : Service() {
@@ -57,6 +62,9 @@ class MusicService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
 
+        val intent = Intent(baseContext, MainActivity::class.java)
+        val contentIntent = PendingIntent.getActivity(this, 0, intent, flag)
+
         val prevIntent = Intent(baseContext, NotificationReceiver::class.java).setAction(Application.PREV)
         val prevPendingIntent = PendingIntent.getBroadcast(baseContext, 0, prevIntent,flag)
 
@@ -76,6 +84,7 @@ class MusicService : Service() {
             BitmapFactory.decodeResource(resources, R.drawable.artboard_2)
         }
         val notification = NotificationCompat.Builder(baseContext, Application.CHANNEL_ID)
+            .setContentIntent(contentIntent)
             .setContentTitle(MusicPlayer.musicListPA[MusicPlayer.songPosition].title)
             .setContentText(MusicPlayer.musicListPA[MusicPlayer.songPosition].artist)
             .setSmallIcon(R.drawable.small_icon)
@@ -94,6 +103,57 @@ class MusicService : Service() {
             .build()
 
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+            mediaSession.setMetadata(
+                MediaMetadataCompat.Builder().putLong(
+                    MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer!!.duration.toLong()
+                ).build()
+            )
+
+            mediaSession.setPlaybackState(getPlayBackState())
+            mediaSession.setCallback(object : MediaSessionCompat.Callback() {
+
+                //called when play button is pressed
+                override fun onPlay() {
+                    super.onPlay()
+                    handlePlayPause()
+                }
+
+                //called when pause button is pressed
+                override fun onPause() {
+                    super.onPause()
+                    handlePlayPause()
+                }
+
+                //called when next button is pressed
+                override fun onSkipToNext() {
+                    super.onSkipToNext()
+                    prevNextSong(increment = true, context = baseContext)
+                }
+
+                //called when previous button is pressed
+                override fun onSkipToPrevious() {
+                    super.onSkipToPrevious()
+                    prevNextSong(increment = false, context = baseContext)
+                }
+
+                //called when headphones buttons are pressed
+                //currently only pause or play music on button click
+                override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
+                    handlePlayPause()
+                    return super.onMediaButtonEvent(mediaButtonEvent)
+                }
+
+                //called when seekbar is changed
+                override fun onSeekTo(pos: Long) {
+                    super.onSeekTo(pos)
+                    mediaPlayer?.seekTo(pos.toInt())
+
+                    mediaSession.setPlaybackState(getPlayBackState())
+                }
+            })
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             startForeground(13, notification)
@@ -116,10 +176,10 @@ class MusicService : Service() {
                 MusicPlayer.musicService!!.mediaPlayer!!.start()
                 MusicPlayer.isPlaying = true
                 MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
-                MusicPlayer.musicService!!.showNotification(R.drawable.pause_svgrepo_com)
+                MusicPlayer.musicService!!.showNotification(R.drawable.pause_svgrepo_com,)
             }
             else{
-                MusicPlayer.musicService!!.showNotification(R.drawable.play_svgrepo_com)
+                MusicPlayer.musicService!!.showNotification(R.drawable.play_svgrepo_com,)
             }
 
 
@@ -148,8 +208,82 @@ class MusicService : Service() {
         Handler(Looper.getMainLooper()).postDelayed(runnable, 0)
     }
 
+    fun getPlayBackState(): PlaybackStateCompat {
+        val playbackSpeed = if (MusicPlayer.isPlaying) 1F else 0F
+
+        return PlaybackStateCompat.Builder().setState(
+            if (mediaPlayer?.isPlaying == true) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+            mediaPlayer!!.currentPosition.toLong(), playbackSpeed)
+            .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+            .build()
+    }
+
+    fun handlePlayPause() {
+        if (MusicPlayer.isPlaying) pauseMusic()
+        else playMusic()
+
+        //update playback state for notification
+        mediaSession.setPlaybackState(getPlayBackState())
+    }
+    private fun playMusic(){
+        //play music
+        MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
+        MusicPlayer.isPlaying = true
+        mediaPlayer?.start()
+        showNotification(R.drawable.pause_svgrepo_com)
+    }
+
+    private fun pauseMusic(){
+        //pause music
+        MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
+        MusicPlayer.isPlaying = false
+        mediaPlayer!!.pause()
+        showNotification(R.drawable.play_svgrepo_com)
+    }
+
+    private fun prevNextSong(increment: Boolean, context: Context){
+
+        setSongPosition(increment = increment)
+
+        if(MusicPlayer.isPlaying){
+
+            MusicPlayer.musicService?.createMediaPlayer(true)
+            playMusic()
+        }
+        else{
+            MusicPlayer.musicService?.createMediaPlayer(false)
+        }
+        Glide.with(context)
+            .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
+            .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
+            .into(MusicPlayer.binding.musicPlayerImg)
+
+        MusicPlayer.binding.musicPlayerTitle.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+        MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+
+        Glide.with(context)
+            .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
+            .apply(RequestOptions().placeholder(R.drawable.artboard_2).centerCrop())
+            .into(NowPlaying.binding.imageNP)
+
+        NowPlaying.binding.nameNP.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
 
 
+
+        MusicPlayer.fvtIndex = fvtChecker(MusicPlayer.musicListPA[MusicPlayer.songPosition].id)
+        if(MusicPlayer.isFav) MusicPlayer.binding.fvtPlayerBtn.setImageResource(R.drawable.add_fav_btn_selected)
+        else MusicPlayer.binding.fvtPlayerBtn.setImageResource(R.drawable.add_fvt_btn)
+
+        //update playback state for notification
+        mediaSession.setPlaybackState(getPlayBackState())
+    }
+
+    //for making persistent
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
+    }
 
 }
 

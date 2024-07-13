@@ -25,8 +25,16 @@
         android:theme="@style/splash_screen"
         tools:targetApi="31">
         <activity
-            android:name=".favourites"
+            android:name=".AddToPlaylist"
             android:exported="false" />
+        <activity
+            android:name=".Remove_songs"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AddSongs"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MusicPlayer"
             android:exported="false"
@@ -34,7 +42,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

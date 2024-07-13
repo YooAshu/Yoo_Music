@@ -32,6 +32,7 @@
         android:layout_height="70dp"
         android:background="@drawable/botttom_nav_bg"
         android:padding="0dp"
+        app:elevation="24dp"
         app:itemActiveIndicatorStyle="@style/App.Custom.Indicator"
         app:itemIconSize="24dp"
         app:itemIconTint="@null"

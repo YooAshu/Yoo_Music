@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="@drawable/gradient_bg_black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/back_btn"
+            android:layout_width="50dp"
+            android:layout_height="70dp"
+            android:layout_marginHorizontal="10dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/back_btn"
+            android:src="@drawable/back_arrow"
+            app:layout_constraintDimensionRatio="H,1:1"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
+
+        </ImageButton>
+
+        <TextView
+            android:id="@+id/playlist_name"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/back_btn"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:fontFamily="@font/bagel"
+            android:gravity="start|center_vertical"
+            android:singleLine="true"
+            android:text="@string/add_to_playlist"
+            android:textColor="@color/white"
+            android:textSize="40sp">
+
+        </TextView>
+
+
+
+    </RelativeLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/addToPlaylistRV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

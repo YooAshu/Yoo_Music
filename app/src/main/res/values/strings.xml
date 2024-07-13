@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Yoo Music</string>
-    <string name="All_Songs">All Songs</string>
+    <string name="All_Songs">0 Songs</string>
     <string name="home_btn">Home</string>
     <string name="fvt_btn">Favourites</string>
     <string name="playlist_btn">Playlists</string>
@@ -21,6 +21,18 @@
     <string name="add_to_list">add song to playlist</string>
     <string name="sort">sort songs</string>
     <string name="library">Your Library</string>
+    <string name="add_songs">Add Songs</string>
+    <string name="add_to_playlist">Add To Playlist</string>
+    <string name="remove_songs">Remove Songs</string>
+    <string name="sort_By">Sort By</string>
+    <string name="edit_playlist">Edit Playlist</string>
+    <string name="delete_playlist">Delete Playlist</string>
+    <string name="add_selected">Add Selected Songs</string>
+    <string name="remove_selected">Remove Selected Songs</string>
+    <string name="sortby_name">By Song Name</string>
+    <string name="sortby_date_new_on_top">By Date(newest on top)</string>
+    <string name="sortby_date_old_on_top">By Date(oldest on top)</string>
+    <string name="sortby_recently_added">Recently Added</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

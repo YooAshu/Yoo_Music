@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 //        bottomNavigationView=findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
         bottomNavigationView = binding.bottomNavigation
 
 
@@ -101,13 +102,55 @@ class MainActivity : AppCompatActivity() {
         val editor = getSharedPreferences("FAVOURITES", MODE_PRIVATE)
         val jsonString = editor.getString("fvtSongs", null)
         val typeToken = object : TypeToken<ArrayList<Music>>(){}.type
-
-
         if(jsonString!=null){
             val data : ArrayList<Music> = GsonBuilder().create().fromJson(jsonString,typeToken)
             favourite.fvtItemList.addAll(data)
+//
         }
 
+        //     to acess playlist data
+
+        playListFragment.playlistList = PlaylistLists()
+
+        val jsonStringPlaylist = editor.getString("MusicPlaylist", null)
+        if(jsonStringPlaylist!=null){
+            val dataPlaylist : PlaylistLists = GsonBuilder().create().fromJson(jsonStringPlaylist,PlaylistLists::class.java)
+            playListFragment.playlistList = dataPlaylist
+        }
+
+        //        check songs are deleted or not
+
+      
+        favourite.fvtItemList = checkSongs(favourite.fvtItemList)
+
+
+        playListFragment.playlistList.list.forEach {
+            it.playlist = checkSongs(it.playlist)
+        }
+
+//        acess sorting order
+
+        val sortingMaineditor = getSharedPreferences("SORTING", MODE_PRIVATE)
+        val jsonStringSortingMain = sortingMaineditor.getString("mainList", null)
+        if(jsonStringSortingMain!=null){
+            val data : Int = GsonBuilder().create().fromJson(jsonStringSortingMain,Int::class.java)
+            HomeFragment.sortingOrder = data
+//
+        }
+        val jsonStringSortingFvt = sortingMaineditor.getString("fvtList", null)
+        if(jsonStringSortingFvt!=null){
+            val data : Int = GsonBuilder().create().fromJson(jsonStringSortingFvt,Int::class.java)
+            favourite.sortingOrder = data
+            Log.d("sortingOrder",favourite.sortingOrder.toString())
+//
+        }
+
+        val jsonStringSortingPlaylist = sortingMaineditor.getString("playList", null)
+        if( jsonStringSortingPlaylist!=null){
+            val data : Int = GsonBuilder().create().fromJson(jsonStringSortingPlaylist,Int::class.java)
+            playlist_details.sortingOrder = data
+//
+        }
 
 
     }
@@ -207,6 +250,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+
+
+
         //to store fvt data
 //        val editor = getSharedPreferences("FAVOURITES", MODE_PRIVATE).edit()
 //        val jsonString = GsonBuilder().create().toJson(favourite.fvtItemList)

@@ -12,6 +12,13 @@
 
         <!-- Adjust the corner size as needed -->
     </style>
+    <style name="roundedCornerShapeFull">
+        <item name="cornerFamily">rounded</item>
+
+        <item name="cornerSize">70dp</item>
+
+        <!-- Adjust the corner size as needed -->
+    </style>
     <style name="roundedCornerShapeTesting">
         <item name="cornerFamily">rounded</item>
 
@@ -25,6 +32,47 @@
     </style><style name="roundedCornerShapeNP">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">15dp</item> <!-- Adjust the corner size as needed -->
+    </style>
+
+    <style name="MyRounded.MaterialComponents.MaterialAlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.CustomDialog.Rounded</item>
+
+        <item name="buttonBarPositiveButtonStyle">@style/MyDialogButtonStylePositive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MyDialogButtonStyleNegative</item>
+        <item name="colorSurface">@color/black</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorAccent">@color/white</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.App.CustomDialog.Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="android:background">@drawable/botttom_nav_bg</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+    <style name="MyDialogButtonStylePositive" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/grad2</item>
+    </style>
+    <style name="MyDialogButtonStyleNegative" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="MyHintTextStyle" parent="TextAppearance.Design.Hint">
+        <item name="android:textSize">18sp</item> </style>
+
+    <style name="MyAlertDialogMessageStyle" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+<!--    for animation-->
+    <style name="bottomDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
+    <style name="addPlaylistDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/dialog_add_playlist</item>
     </style>
 
 </resources>
