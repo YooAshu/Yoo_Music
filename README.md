@@ -26,13 +26,14 @@ Welcome to Yoo Music, your ultimate music companion on Android! This application
 ## Screenshots
 Here are some screenshots showcasing the interface and functionality of Yoo Music:
 
- ![Screenshot 1](https://github.com/user-attachments/assets/4cd14580-177d-48f8-845a-6bf686939c0b)
+ ![Screenshot 1](https://github.com/user-attachments/assets/4da7a7b9-e6df-4524-8bb3-65bd8297be89)
  <img src="https://github.com/YooAshu/Yoo_Music/assets/95643200/ef15270e-911b-4b20-9e0f-bbe7111eeab3" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/118e8c25-ebfb-4e9f-ac23-551da6c65b22" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/dd44c64e-af59-4893-bad4-a929ecd48a79" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/da1439a5-c34b-43b1-8fd1-25dce273dbb0" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/9f38cd40-03c1-429b-9049-fabd455a55f1" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/5f1753fb-3b7a-41ae-a202-cf086998b073" alt="Screenshot 1" style="width: 350px; height: auto;">
+
 
 ## Installation
 
