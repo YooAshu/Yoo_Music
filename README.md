@@ -1,5 +1,7 @@
 # Yoo Music - README
 
+ Download the APK file from [https://github.com/YooAshu/Yoo_Music/releases/download/v1.0.0/YooMusic.apk].
+
 ## Overview
 Welcome to Yoo Music, your ultimate music companion on Android! This application is designed to elevate your music listening experience with its intuitive design and powerful features. Built using XML and Kotlin, Yoo Music offers a seamless way to discover, organize, and enjoy your favorite tunes.
 
@@ -31,11 +33,11 @@ Here are some screenshots showcasing the interface and functionality of Yoo Musi
  <img src="https://github.com/user-attachments/assets/da1439a5-c34b-43b1-8fd1-25dce273dbb0" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/9f38cd40-03c1-429b-9049-fabd455a55f1" alt="Screenshot 1" style="width: 350px; height: auto;">
  <img src="https://github.com/user-attachments/assets/5f1753fb-3b7a-41ae-a202-cf086998b073" alt="Screenshot 1" style="width: 350px; height: auto;">
-<!--
+
 ## Installation
 
 To install Yoo Music, follow these steps:
-1. Download the APK file from [link].
+1. Download the APK file from [https://github.com/YooAshu/Yoo_Music/releases/download/v1.0.0/YooMusic.apk].
 2. Open the APK file on your Android device.
 3. Follow the on-screen instructions to install the app.
 
@@ -44,8 +46,7 @@ Once installed, you can start using Yoo Music by:
 1. Launching the app from your device's home screen.
 2. Browsing through the music catalog to discover new songs and artists.
 3. Creating playlists and adding your favorite songs for personalized listening experiences.
-4. Downloading songs and playlists for offline playback during times without an internet connection.
--->
+
 ## Feedback
 We value your feedback! If you encounter any issues or have suggestions for improvement, please feel free to reach out to me
 
