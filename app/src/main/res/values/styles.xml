@@ -15,7 +15,7 @@
     <style name="roundedCornerShapeFull">
         <item name="cornerFamily">rounded</item>
 
-        <item name="cornerSize">70dp</item>
+        <item name="cornerSize">50%</item>
 
         <!-- Adjust the corner size as needed -->
     </style>

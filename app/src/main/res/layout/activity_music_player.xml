@@ -10,7 +10,8 @@
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.07"
         android:layout_marginTop="10dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,13 +49,17 @@
     </LinearLayout>
 
     <com.google.android.material.imageview.ShapeableImageView
+
         android:id="@+id/musicPlayerImg"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:maxWidth="400dp"
+        app:layout_constraintWidth_max="430dp"
+        app:layout_constraintHeight_percent="0.42"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="34dp"
         android:src="@drawable/artboard_2"
-        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintDimensionRatio="W,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
@@ -63,7 +68,8 @@
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.22"
 
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="10dp"
@@ -192,6 +198,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/pause_play"
         android:src="@drawable/pause_btn"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/musicPlayerImg" />
@@ -211,9 +218,10 @@
         app:layout_constraintTop_toBottomOf="@+id/musicPlayerImg" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintHeight_percent="0.08"
         android:id="@+id/optionsContainer"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="0dp"
         android:background="@drawable/botttom_nav_bg"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
