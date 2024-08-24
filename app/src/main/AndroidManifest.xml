@@ -12,6 +12,10 @@
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
         android:minSdkVersion="34" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
 
     <application
         android:name=".Application"
@@ -60,6 +64,10 @@
         <receiver
             android:name=".NotificationReceiver"
             android:enabled="true" />
+
+
+
+
     </application>
 
 </manifest>

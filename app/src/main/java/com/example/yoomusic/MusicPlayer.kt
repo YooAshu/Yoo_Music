@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
 import android.net.Uri
@@ -367,18 +369,33 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection , MediaPlayer.OnCompl
                 updateLayout()
             }
         }
+
+    Log.d("de", musicListPA[songPosition].toString())
     }
 
     private fun playMusic() {
 
-        musicService!!.mediaPlayer!!.start()
-        isPlaying = true
-        binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
-        musicService!!.showNotification(R.drawable.pause_svgrepo_com)
-        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setOnAudioFocusChangeListener(musicService!!.audioFocusChangeListener)
+            .build()
+
+        val result = musicService!!.audioManager.requestAudioFocus(focusRequest)
+
+        if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
+
+            musicService!!.mediaPlayer!!.start()
+            isPlaying = true
+            binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+            musicService!!.showNotification(R.drawable.pause_svgrepo_com)
+            NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
+
+        }
+
+
     }
 
     private fun pauseMusic() {
+        musicService!!.audioManager.abandonAudioFocus(musicService!!.audioFocusChangeListener)
         musicService!!.mediaPlayer!!.pause()
         isPlaying = false
         binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)

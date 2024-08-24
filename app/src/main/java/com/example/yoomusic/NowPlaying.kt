@@ -2,6 +2,8 @@ package com.example.yoomusic
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -92,15 +94,26 @@ class NowPlaying : Fragment() {
     }
 
     private fun playMusic(){
-        MusicPlayer.musicService!!.mediaPlayer!!.start()
-        binding.playPauseNP.setImageResource(R.drawable.pause_np)
-        MusicPlayer.musicService!!.showNotification(R.drawable.pause_svgrepo_com)
-        MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
-        MusicPlayer.isPlaying = true
+
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setOnAudioFocusChangeListener(MusicPlayer.musicService!!.audioFocusChangeListener)
+            .build()
+
+        val result = MusicPlayer.musicService!!.audioManager.requestAudioFocus(focusRequest)
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            MusicPlayer.musicService!!.mediaPlayer!!.start()
+            binding.playPauseNP.setImageResource(R.drawable.pause_np)
+            MusicPlayer.musicService!!.showNotification(R.drawable.pause_svgrepo_com)
+            MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+            MusicPlayer.isPlaying = true
+        }
+
 
 
     }
     private fun pauseMusic(){
+
+        MusicPlayer.musicService!!.audioManager.abandonAudioFocus(MusicPlayer.musicService!!.audioFocusChangeListener)
 
         MusicPlayer.musicService!!.mediaPlayer!!.pause()
         binding.playPauseNP.setImageResource(R.drawable.play_np)

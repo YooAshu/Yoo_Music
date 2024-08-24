@@ -2,13 +2,19 @@ package com.example.yoomusic
 
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.graphics.BitmapFactory
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -28,6 +34,9 @@ class MusicService : Service() {
 
     private lateinit var runnable : Runnable
 
+    lateinit var audioManager: AudioManager
+    var focusRequest: AudioFocusRequest? = null
+
     private lateinit var mediaSession: MediaSessionCompat
     override fun onBind(intent: Intent?): IBinder {
         mediaSession = MediaSessionCompat(baseContext, "My Music")
@@ -40,6 +49,27 @@ class MusicService : Service() {
         fun currentService(): MusicService {
             return this@MusicService
         }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        registerReceiver(noisyAudioReceiver, filter)
+//        initializeAudioFocus()
+    }
+
+//    override fun onStart(intent: Intent?, startId: Int) {
+//        super.onStart(intent, startId)
+//        initializeAudioFocus()
+//    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        abandonAudioFocus()
+        unregisterReceiver(noisyAudioReceiver)
+        pauseMusic()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -226,15 +256,27 @@ class MusicService : Service() {
         mediaSession.setPlaybackState(getPlayBackState())
     }
     private fun playMusic(){
+
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setOnAudioFocusChangeListener(audioFocusChangeListener)
+            .build()
+
+        val result = audioManager.requestAudioFocus(focusRequest)
         //play music
-        MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
-        NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
-        MusicPlayer.isPlaying = true
-        mediaPlayer?.start()
-        showNotification(R.drawable.pause_svgrepo_com)
+
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            // Start playback
+            MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+            NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
+            MusicPlayer.isPlaying = true
+            mediaPlayer?.start()
+            showNotification(R.drawable.pause_svgrepo_com)
+        }
+
     }
 
     private fun pauseMusic(){
+        audioManager.abandonAudioFocus(audioFocusChangeListener)
         //pause music
         MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
         NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
@@ -282,8 +324,119 @@ class MusicService : Service() {
 
     //for making persistent
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+//        initializeAudioFocus()
+//        playMusic()
+        Log.d("MusicService", "onStartCommand called")
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setOnAudioFocusChangeListener(audioFocusChangeListener)
+            .build()
+
+        val result = audioManager.requestAudioFocus(focusRequest)
         return START_STICKY
     }
 
+
+//when other music player plays musi stop playing
+     val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                // You have gained audio focus, resume playback or increase volume
+                MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.pause_btn)
+                NowPlaying.binding.playPauseNP.setImageResource(R.drawable.pause_np)
+                MusicPlayer.isPlaying = true
+                mediaPlayer?.start()
+                showNotification(R.drawable.pause_svgrepo_com)
+                mediaPlayer?.setVolume(1.0f, 1.0f) // Restore volume
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                // You have lost audio focus completely, stop playback
+                MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+                NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
+                MusicPlayer.isPlaying = false
+                mediaPlayer!!.pause()
+                showNotification(R.drawable.play_svgrepo_com)
+//                mediaPlayer?.release() // Optionally release resources
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                // You have temporarily lost audio focus, pause playback
+                MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+                NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
+                MusicPlayer.isPlaying = false
+                mediaPlayer!!.pause()
+                showNotification(R.drawable.play_svgrepo_com)
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                // You have temporarily lost audio focus, but can duck (lower volume)
+                mediaPlayer?.setVolume(0.5f, 0.5f) // Reduce volume
+            }
+        }
+    }
+
+    fun initializeAudioFocus() {
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        // Create an AudioFocusRequest (available from API level 26)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                .setAcceptsDelayedFocusGain(true)
+                .setWillPauseWhenDucked(true)
+                .build()
+
+            val result = audioManager.requestAudioFocus(focusRequest!!)
+            handleAudioFocusResult(result)
+        } else {
+            // For devices running below API level 26
+            val result = audioManager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+            handleAudioFocusResult(result)
+        }
+    }
+
+    private fun handleAudioFocusResult(result: Int) {
+        when (result) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                // You have audio focus now
+//                startPlayback()
+                playMusic()
+            }
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                // Failed to gain audio focus, handle the failure
+            }
+        }
+    }
+    fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest?.let {
+                audioManager.abandonAudioFocusRequest(it)
+            }
+        } else {
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
+        }
+    }
+//when bluetooth headset removed
+    private val noisyAudioReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == intent.action) {
+                // Audio is becoming noisy, pause or stop playback
+                MusicPlayer.binding.ButtonPlayPause.setImageResource(R.drawable.play_btn)
+                NowPlaying.binding.playPauseNP.setImageResource(R.drawable.play_np)
+                MusicPlayer.isPlaying = false
+                mediaPlayer!!.pause()
+                showNotification(R.drawable.play_svgrepo_com)
+            }
+        }
+    }
+
 }
+
+
+
+
+
+
+
 
