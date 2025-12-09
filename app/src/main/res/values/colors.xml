@@ -9,4 +9,6 @@
     <color name="grad2">#9D00FF</color>
     <color name="grad3">#5200D6</color>
     <color name="dialog_icon">#C6C6C6</color>
+    <color name="btn_player_active">#702D2D2D</color>
+
 </resources>

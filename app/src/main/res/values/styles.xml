@@ -10,6 +10,16 @@
 
         <item name="cornerSize">20dp</item>
 
+
+        <!-- Adjust the corner size as needed -->
+    </style>
+    <style name="roundedCornerShapeAlbumImageMusicPlayer">
+        <item name="cornerFamily">rounded</item>
+
+        <item name="cornerSizeBottomLeft">40dp</item>
+        <item name="cornerSizeBottomRight">40dp</item>
+
+
         <!-- Adjust the corner size as needed -->
     </style>
     <style name="roundedCornerShapeFull">

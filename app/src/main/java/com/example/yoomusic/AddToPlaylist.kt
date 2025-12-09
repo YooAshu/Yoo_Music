@@ -32,6 +32,11 @@ class AddToPlaylist : AppCompatActivity(), playlistHolderAdapter.OnItemClickList
         binding.addToPlaylistRV.layoutManager = LinearLayoutManager(this)
         adapter = playlistHolderAdapter(this, playlistList = playListFragment.playlistList.list,this)
         binding.addToPlaylistRV.adapter = adapter
+
+        if (playListFragment.playlistList.list.isEmpty()){
+            binding.isThereArePlayList.text = "No Playlist Found"
+
+        }
     }
 
     @SuppressLint("CommitPrefEdits", "SetTextI18n")

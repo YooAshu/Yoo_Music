@@ -87,7 +87,7 @@ class NotificationReceiver : BroadcastReceiver() {
         MusicPlayer.binding.musicPlayerAlbum.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].artist
         MusicPlayer.binding.songDuration.text = formatDuration(MusicPlayer.musicListPA[MusicPlayer.songPosition].duration)
 
-        MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+//        MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
 
         if(MusicPlayer.isFav){
             MusicPlayer.binding.fvtPlayerBtn.setImageResource(R.drawable.add_fav_btn_selected)

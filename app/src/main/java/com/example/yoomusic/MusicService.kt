@@ -303,7 +303,7 @@ class MusicService : Service() {
             .into(MusicPlayer.binding.musicPlayerImg)
 
         MusicPlayer.binding.musicPlayerTitle.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
-        MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
+//        MusicPlayer.binding.marqueeText.text = MusicPlayer.musicListPA[MusicPlayer.songPosition].title
 
         Glide.with(context)
             .load(MusicPlayer.musicListPA[MusicPlayer.songPosition].artUri)
