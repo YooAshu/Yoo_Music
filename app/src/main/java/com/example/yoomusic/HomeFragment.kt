@@ -3,33 +3,26 @@ package com.example.yoomusic
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.hardware.biometrics.BiometricManager.Strings
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.yoomusic.databinding.ActivityMainBinding
 import com.example.yoomusic.databinding.FragmentHomeBinding
 import com.google.gson.GsonBuilder
 import java.io.File
-import kotlin.math.log
+import kotlin.text.set
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -77,6 +70,7 @@ class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
             // Perform some initialization here
             musicListHome = getAllAudio()
             MainActivity.homeCreated = true
+            loadThumbnailsAsync()
         }
 //        musicListHome = ArrayList()
         loadMusicList()
@@ -154,13 +148,14 @@ class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
         )
 
         val selection = """
-    ${MediaStore.Audio.Media.DATA} NOT LIKE ? 
+    ${MediaStore.Audio.Media.DATA} NOT LIKE ?
+    AND ${MediaStore.Audio.Media.DATA} NOT LIKE ?
     AND ${MediaStore.Audio.Media.IS_MUSIC} != 0
     AND ${MediaStore.Audio.Media.TITLE} NOT LIKE 'AUD%'
     AND ${MediaStore.Audio.Media.TITLE} NOT LIKE 'PTT%'
 """.trimIndent()
 
-        val selectionArgs = arrayOf("%WhatsApp/Audio%")
+        val selectionArgs = arrayOf("%WhatsApp/Audio%","%Recordings%")
 
         val cursor = requireContext().contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -188,11 +183,13 @@ class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
                     val albumIdC =
                         cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
                             .toString()
-                    val uri = Uri.parse("content://media/external/audio/albumart")
-                    if (uri == null) {
-                        Log.d("HomeFragment", "Uri is null")
-                    }
-                    val artUriC = Uri.withAppendedPath(uri, albumIdC).toString()
+//                    val uri = Uri.parse("content://media/external/audio/albumart")
+//                    if (uri == null) {
+//                        Log.d("HomeFragment", "Uri is null")
+//                    }
+//                    val artUriC = Uri.withAppendedPath(uri, albumIdC).toString()
+//                    val artUriC = getThumbnailFromFile(pathC) ?: ""
+
 
                     val dateAddedC = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED))
                     val music = Music(
@@ -202,7 +199,7 @@ class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
                         artist = artistC,
                         path = pathC,
                         duration = durationC,
-                        artUri = artUriC,
+                        artUri = "",
                         dateAdded = dateAddedC
                     )
 
@@ -295,4 +292,52 @@ class HomeFragment : Fragment(), playlistHolderAdapter.OnItemClickListener {
 
 
     }
+
+    private fun loadThumbnailsAsync() {
+        Thread {
+            for ((index, music) in musicListHome.withIndex()) {
+                if (music.artUri.isEmpty()) {
+                    val cachedUri = getCachedThumbnail(music.path)
+                    val artUri = cachedUri ?: getThumbnailFromFile(music.path) ?: ""
+
+                    if (artUri.isNotEmpty()) {
+                        musicListHome[index] = music.copy(artUri = artUri)
+                        requireActivity().runOnUiThread {
+                            musicAdapter.notifyItemChanged(index)
+                        }
+                    }
+                }
+            }
+        }.start()
+    }
+
+    private fun getCachedThumbnail(filePath: String): String? {
+        val fileName = "thumb_${filePath.hashCode()}.png"
+        val cachedFile = File(requireContext().cacheDir, fileName)
+        return if (cachedFile.exists()) cachedFile.absolutePath else null
+    }
+
+    private fun getThumbnailFromFile(filePath: String): String? {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(filePath)
+            val picture = retriever.embeddedPicture
+            retriever.release()
+
+            if (picture != null) {
+                val fileName = "thumb_${filePath.hashCode()}.png"
+                val file = File(requireContext().cacheDir, fileName)
+                file.outputStream().use { output ->
+                    output.write(picture)
+                }
+                file.absolutePath
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "Error extracting thumbnail: ${e.message}")
+            null
+        }
+    }
+
 }
