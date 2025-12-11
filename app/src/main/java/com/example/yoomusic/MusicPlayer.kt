@@ -7,34 +7,36 @@ import android.content.ServiceConnection
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.audiofx.AudioEffect
-import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.widget.SeekBar
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.example.yoomusic.databinding.ActivityMusicPlayerBinding
-import com.google.gson.GsonBuilder
-import androidx.transition.TransitionSet
-import androidx.transition.Slide
-import androidx.transition.Fade
-import androidx.transition.TransitionManager
 import android.view.Gravity
 import android.view.View
-import android.widget.ScrollView
-import android.view.GestureDetector
-import android.view.MotionEvent
-
+import android.widget.SeekBar
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.transition.Fade
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.example.yoomusic.composables.LyricsPanel
+import com.example.yoomusic.composables.LyricsPlaceholderScreen
+import com.example.yoomusic.data.LyricsViewModel
+import com.example.yoomusic.databinding.ActivityMusicPlayerBinding
+import com.google.gson.GsonBuilder
 
 
 class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnCompletionListener {
 
     private var lyricsVisible = false
+    lateinit var lyricsViewModel: LyricsViewModel
+
 
     companion object {
         lateinit var musicListPA: ArrayList<Music>
@@ -50,15 +52,19 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         var musicService: MusicService? = null
 
         @SuppressLint("StaticFieldLeak")
+
         lateinit var binding: ActivityMusicPlayerBinding
         var nowPlayingId: String = ""
         var isFav = false
         var fvtIndex: Int = -1
 
+        lateinit var lyricsVM: LyricsViewModel
+
     }
 
 
     //    private lateinit var binding: ActivityMusicPlayerBinding
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,58 +84,71 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         // --- LYRICS SWIPE SETUP ---
 
 // start with lyrics panel hidden (moved down off screen)
-        binding.lyricsPanel.post {
-            binding.lyricsPanel.translationY = binding.lyricsPanel.height.toFloat()
-        }
+//        binding.lyricsPanel.post {
+//            binding.lyricsPanel.translationY = binding.lyricsPanel.height.toFloat()
+//        }
 
-        val gestureDetector = GestureDetector(
-            this,
-            object : android.view.GestureDetector.SimpleOnGestureListener() {
-
-                private val SWIPE_THRESHOLD = 80
-                private val SWIPE_VELOCITY_THRESHOLD = 80
-
-                override fun onFling(
-                    e1: MotionEvent?,
-                    e2: MotionEvent,
-                    velocityX: Float,
-                    velocityY: Float
-                ): Boolean {
-                    if (e1 == null) return false
-
-                    val diffY = e1.y - e2.y
-                    val SWIPE_THRESHOLD = 80
-                    val SWIPE_VELOCITY_THRESHOLD = 80
-
-                    // Swipe UP -> show lyrics
-                    if (diffY > SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                        showLyrics()
-                        return true
-                    }
-
-                    // Swipe DOWN -> hide lyrics
-                    if (diffY < -SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                        hideLyrics()
-                        return true
-                    }
-
-                    return false
-                }
-
-            }
-        )
+//        val gestureDetector = GestureDetector(
+//            this,
+//            object : android.view.GestureDetector.SimpleOnGestureListener() {
+//
+//                private val SWIPE_THRESHOLD = 80
+//                private val SWIPE_VELOCITY_THRESHOLD = 80
+//
+//                override fun onFling(
+//                    e1: MotionEvent?,
+//                    e2: MotionEvent,
+//                    velocityX: Float,
+//                    velocityY: Float
+//                ): Boolean {
+//                    if (e1 == null) return false
+//
+//                    val diffY = e1.y - e2.y
+//                    val SWIPE_THRESHOLD = 80
+//                    val SWIPE_VELOCITY_THRESHOLD = 80
+//
+//                    // Swipe UP -> show lyrics
+//                    if (diffY > SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+//                        showLyrics()
+//                        return true
+//                    }
+//
+//                    // Swipe DOWN -> hide lyrics
+//                    if (diffY < -SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+//                        hideLyrics()
+//                        return true
+//                    }
+//
+//                    return false
+//                }
+//
+//            }
+//        )
 
 // swipe on album art
-        binding.lyricsHintContainer.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+//        binding.lyricsHintContainer.setOnTouchListener { _, event ->
+//            gestureDetector.onTouchEvent(event)
+//            true
+//        }
+//
+//// optional: swipe down on lyrics panel to close
+//        binding.lyricsPanel.setOnTouchListener { _, event ->
+//            gestureDetector.onTouchEvent(event)
+//            true
+//        }
+
+
+        lyricsViewModel = ViewModelProvider(this)[LyricsViewModel::class.java]
+        lyricsVM = lyricsViewModel   // store globally
+
+        binding.lyricsComposeView.setContent {
+            MaterialTheme { // from material3
+                LyricsPanel(
+                    viewModel = lyricsViewModel
+                )
+            }
         }
 
-// optional: swipe down on lyrics panel to close
-        binding.lyricsPanel.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
-        }
 
 
         binding.ButtonPlayPause.setOnClickListener {
@@ -193,28 +212,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             }
         }
 
-//        binding.equalizerBtn.setOnClickListener {
-//            try {
-//                val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
-//                eqIntent.putExtra(
-//                    AudioEffect.EXTRA_AUDIO_SESSION,
-//                    musicService!!.mediaPlayer!!.audioSessionId
-//                )
-//                eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, baseContext.packageName)
-//                eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-//                startActivityForResult(eqIntent, 13)
-//            } catch (e: Exception) {
-//                Toast.makeText(this, "Equalizer Not Supported", Toast.LENGTH_SHORT).show()
-//            }
-//
-//        }
-//        binding.shareBtn.setOnClickListener {
-//            val shareIntent = Intent()
-//            shareIntent.action = Intent.ACTION_SEND
-//            shareIntent.type = "audio/*"
-//            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(musicListPA[songPosition].path))
-//            startActivity(Intent.createChooser(shareIntent, "Share Music"))
-//        }
+
 
 
         binding.fvtPlayerBtn.setOnClickListener {
@@ -252,17 +250,17 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             startActivity(Intent(this, AddToPlaylist::class.java))
         }
 
-//        binding.playerBtn.setOnClickListener {
-//            binding.playerBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_active)
-//            binding.lyricsBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_inactive)
-//            slideToPlayer()
-//        }
-//
-//        binding.lyricsBtn.setOnClickListener {
-//            binding.lyricsBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_active)
-//            binding.playerBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_inactive)
-//            slideToLyrics()
-//        }
+        binding.playerBtn.setOnClickListener {
+            binding.playerBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_active)
+            binding.lyricsBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_inactive)
+            slideToPlayer()
+        }
+
+        binding.lyricsBtn.setOnClickListener {
+            binding.lyricsBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_active)
+            binding.playerBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_inactive)
+            slideToLyrics()
+        }
 
 //        binding.lyricsContainer.setNestedScrollingEnabled(true)
 
@@ -459,6 +457,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         Log.d("de", musicListPA[songPosition].toString())
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun playMusic() {
 
         val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
@@ -499,6 +498,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         }
 
 
+        lyricsViewModel.updateSongPosition(songPosition)
         if (isPlaying) {
             createMediaPlayer(playState = true)
         } else {
@@ -506,6 +506,8 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         }
 
         updateLayout()
+
+        lyricsViewModel.setLyricsStateToIdle()
 
 
     }
@@ -519,6 +521,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             songPosition--
         }
 
+        lyricsViewModel.updateSongPosition(songPosition)
 
 
         if (isPlaying) {
@@ -527,6 +530,8 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             createMediaPlayer(playState = false)
         }
         updateLayout()
+
+        lyricsViewModel.setLyricsStateToIdle()
 
     }
 
@@ -638,55 +643,69 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
 //        editor.apply()
     }
 
-//    private fun slideToLyrics() {
-//        val transition = TransitionSet().apply {
-//            addTransition(Fade())
-//            addTransition(Slide(Gravity.START))
-//            duration = 400
-//        }
-//
-//        TransitionManager.beginDelayedTransition(binding.root, transition)
-//
-//        binding.musicPlayerImg.visibility = View.GONE
-//        binding.linearLayout2.visibility = View.GONE
-//        // Show lyrics container (add your lyrics view here)
-//    }
-//
-//    private fun slideToPlayer() {
-//        val transition = TransitionSet().apply {
-//            addTransition(Fade())
-//            addTransition(Slide(Gravity.END))
-//            duration = 400
-//        }
-//
-//        TransitionManager.beginDelayedTransition(binding.root, transition)
-//
-//        binding.musicPlayerImg.visibility = View.VISIBLE
-//        binding.linearLayout2.visibility = View.VISIBLE
-//    }
+    private fun slideToLyrics() {
+        val transition = TransitionSet().apply {
+            // Player views disappearing → slide LEFT
+            addTransition(Slide(Gravity.START).apply {
+                addTarget(binding.musicPlayerImg)
+                addTarget(binding.songInfoContainer)
+                addTarget(binding.timeDisplay)
+                addTarget(binding.addToListContainer)
+            })
 
+            // Lyrics appearing → slide IN from RIGHT
+            addTransition(Slide(Gravity.END).apply {
+                addTarget(binding.lyricsContainer)
+            })
 
-    private fun showLyrics() {
-        if (lyricsVisible) return
-        lyricsVisible = true
-        binding.lyricsPanel.animate()
-            .translationY(0f)
-            .setDuration(250)
-            .start()
+            addTransition(Fade())
+            duration = 400
+        }
 
-        binding.lyricsHintContainer.visibility = View.GONE
+        TransitionManager.beginDelayedTransition(binding.root, transition)
+
+        // Hide player views
+        binding.musicPlayerImg.visibility = View.GONE
+        binding.songInfoContainer.visibility = View.GONE
+        binding.timeDisplay.visibility = View.GONE
+        binding.addToListContainer.visibility = View.GONE
+
+        // Show lyrics
+        binding.lyricsContainer.visibility = View.VISIBLE
     }
 
-    private fun hideLyrics() {
-        if (!lyricsVisible) return
-        lyricsVisible = false
-        binding.lyricsPanel.animate()
-            .translationY(binding.lyricsPanel.height.toFloat())
-            .setDuration(250)
-            .start()
 
-        binding.lyricsHintContainer.visibility = View.VISIBLE
+    private fun slideToPlayer() {
+        val transition = TransitionSet().apply {
+            // Lyrics disappearing → slide RIGHT
+            addTransition(Slide(Gravity.END).apply {
+                addTarget(binding.lyricsContainer)
+            })
+
+            // Player appearing → slide IN from LEFT
+            addTransition(Slide(Gravity.START).apply {
+                addTarget(binding.musicPlayerImg)
+                addTarget(binding.songInfoContainer)
+                addTarget(binding.timeDisplay)
+                addTarget(binding.addToListContainer)
+            })
+
+            addTransition(Fade())
+            duration = 400
+        }
+
+        TransitionManager.beginDelayedTransition(binding.root, transition)
+
+        // Show player views
+        binding.musicPlayerImg.visibility = View.VISIBLE
+        binding.songInfoContainer.visibility = View.VISIBLE
+        binding.timeDisplay.visibility = View.VISIBLE
+        binding.addToListContainer.visibility = View.VISIBLE
+
+        // Hide lyrics
+        binding.lyricsContainer.visibility = View.GONE
     }
+
 
 
 

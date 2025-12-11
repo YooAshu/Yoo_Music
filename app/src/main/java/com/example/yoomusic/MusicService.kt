@@ -233,6 +233,14 @@ class MusicService : Service() {
         runnable = Runnable {
             MusicPlayer.binding.currentDuration.text = formatDuration(mediaPlayer!!.currentPosition.toLong())
             MusicPlayer.binding.seekBar.progress = mediaPlayer!!.currentPosition
+            // UPDATE LYRICS SYNC
+            try {
+                MusicPlayer.lyricsVM.updateCurrentPosition(
+                    mediaPlayer!!.currentPosition.toLong()
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             Handler(Looper.getMainLooper()).postDelayed(runnable, 200)
         }
         Handler(Looper.getMainLooper()).postDelayed(runnable, 0)

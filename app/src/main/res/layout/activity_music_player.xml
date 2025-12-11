@@ -31,21 +31,61 @@
 
 
     <LinearLayout
+        android:background="@drawable/gradient_overlay2"
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:orientation="horizontal"
-        android:paddingTop="10dp"
-        android:paddingBottom="5dp">
+        android:paddingTop="0dp"
+        android:paddingBottom="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
         <ImageButton
             android:id="@+id/back_btn"
             android:layout_width="50dp"
             android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:layout_weight="0"
             android:background="@android:color/transparent"
             android:contentDescription="@string/back_btn"
             android:src="@drawable/back_arrow" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/playerLyricsToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_weight="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/capsule_for_buttom"
+        android:backgroundTint="#702D2D2D"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/playerBtn"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_active"
+            android:contentDescription="Player View"
+            android:padding="0dp"
+            android:text="Player"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/lyricsBtn"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_inactive"
+            android:contentDescription="Lyrics View"
+            android:padding="0dp"
+            android:text="Lyrics"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 
@@ -53,8 +93,8 @@
 
 
 
-
     <LinearLayout
+        android:id="@+id/songInfoContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -119,57 +159,37 @@
 
     </LinearLayout>
 
-    <!-- SWIPE UP HINT OVERLAY -->
-    <LinearLayout
-        android:id="@+id/lyricsHintContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addToListContainer"
-        app:layout_constraintBottom_toTopOf="@+id/timeDisplay"
-        android:gravity="bottom|center_horizontal"
-        android:paddingBottom="12dp"
-        android:clickable="false"
-        android:focusable="false"
-        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/lyricsHintText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Swipe up for lyrics"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <!-- optional arrow icon if you have one -->
-        <!--
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_up"
-            android:layout_marginTop="4dp"/>
-        -->
-    </LinearLayout>
 
     <!-- TIME DISPLAY -->
-    <RelativeLayout
+
+    <!-- SEEKBAR -->
+    <LinearLayout
         android:id="@+id/timeDisplay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
-        android:gravity="bottom"
+        android:gravity="fill_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/controlButtonsLayout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
-        app:layout_constraintTop_toBottomOf="@+id/lyricsHintContainer"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/addToListContainer">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:layout_marginBottom="20dp">
+
 
         <TextView
             android:id="@+id/currentDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_weight="1"
             android:text="@string/song_duration"
             android:textColor="@color/white"
             android:textSize="12sp" />
@@ -178,40 +198,37 @@
             android:id="@+id/songDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_weight="1"
+            android:gravity="end"
             android:text="@string/song_duration"
             android:textColor="@color/white"
             android:textSize="12sp" />
-    </RelativeLayout>
+        </LinearLayout>
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:progressDrawable="@drawable/seek_bar"
+            android:thumb="@drawable/seek_thumb" />
+    </LinearLayout>
 
-    <!-- SEEKBAR -->
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="10dp"
-        app:layout_constraintHeight_percent="0.03"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeDisplay"
-        app:layout_constraintBottom_toTopOf="@+id/controlButtonsLayout"
-        android:progressDrawable="@drawable/seek_bar"
-        android:thumb="@drawable/seek_thumb" />
+
 
     <!-- CONTROL BUTTONS (Prev, Play/Pause, Next) -->
     <LinearLayout
         android:id="@+id/controlButtonsLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="40dp"
         android:gravity="center"
         android:orientation="horizontal"
+        android:layout_marginBottom="40dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.12"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar">
+        >
 
         <ImageButton
             android:id="@+id/shuffleBtn"
@@ -264,44 +281,27 @@
             android:src="@drawable/repeat_all" />
     </LinearLayout>
 
+<!--    lyrics-->
 
-    <!-- LYRICS PANEL (hidden, slides up) -->
+    <!-- LYRICS CONTAINER -->
     <LinearLayout
-        android:id="@+id/lyricsPanel"
+        android:id="@+id/lyricsContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.4"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
         android:orientation="vertical"
-        android:background="#CC000000"
-        android:padding="16dp"
-        android:elevation="8dp">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/controlButtonsLayout">
 
-        <TextView
-            android:id="@+id/lyricsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lyrics"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:textSize="16sp" />
-
-        <ScrollView
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/lyricsComposeView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="match_parent"/>
 
-            <TextView
-                android:id="@+id/lyricsText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Lyrics will appear here…"
-                android:textColor="@android:color/white"
-                android:lineSpacingExtra="2dp" />
-        </ScrollView>
     </LinearLayout>
+
+
+
 
 
 
