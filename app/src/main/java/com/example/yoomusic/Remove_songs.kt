@@ -2,12 +2,8 @@ package com.example.yoomusic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AnimationUtils
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.yoomusic.databinding.ActivityRemoveSongsBinding
 import com.google.gson.GsonBuilder

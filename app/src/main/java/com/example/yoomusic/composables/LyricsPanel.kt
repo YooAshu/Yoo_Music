@@ -1,17 +1,12 @@
 package com.example.yoomusic.composables
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +19,7 @@ import com.example.yoomusic.MusicPlayer
 import com.example.yoomusic.MusicPlayer.Companion.musicListPA
 import com.example.yoomusic.data.LyricsUiState
 import com.example.yoomusic.data.LyricsViewModel
-import kotlin.text.compareTo
-import kotlin.text.get
+import androidx.compose.foundation.background
 
 @Composable
 fun LyricsPanel(
@@ -33,15 +27,16 @@ fun LyricsPanel(
 ) {
     val state by viewModel.lyricsState.collectAsState()
     val songPosition by viewModel.songPosition.collectAsState()
+    var showSearchDialog by remember { mutableStateOf(false) }
 
-    val title = if (songPosition < MusicPlayer.musicListPA.size) {
-        MusicPlayer.musicListPA[songPosition].title
+    val title = if (songPosition < musicListPA.size) {
+        musicListPA[songPosition].title
     } else {
         "Unknown"
     }
 
-    val musicId = if (songPosition < MusicPlayer.musicListPA.size) {
-        MusicPlayer.musicListPA[songPosition].id
+    val musicId = if (songPosition < musicListPA.size) {
+        musicListPA[songPosition].id
     } else {
         ""
     }
@@ -59,14 +54,34 @@ fun LyricsPanel(
             .background(Color(0xAA000000))
             .padding(16.dp)
     ) {
-        Text(
-            text = title,
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(
+                onClick = { showSearchDialog = true },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit lyrics",
+                    tint = Color(0xFF9D00FF),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
         Spacer(Modifier.height(8.dp))
 
@@ -128,5 +143,17 @@ fun LyricsPanel(
                 }
             }
         }
+    }
+
+    if (showSearchDialog) {
+        SearchLyricsDialog(
+            viewModel = viewModel,
+            title = title,
+            onDismiss = { showSearchDialog = false },
+            onSelect = { selectedResult ->
+                viewModel.selectAndSaveLyrics(selectedResult, musicId)
+                showSearchDialog = false
+            }
+        )
     }
 }

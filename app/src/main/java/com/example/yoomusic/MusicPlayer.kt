@@ -26,7 +26,6 @@ import androidx.transition.TransitionSet
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.yoomusic.composables.LyricsPanel
-import com.example.yoomusic.composables.LyricsPlaceholderScreen
 import com.example.yoomusic.data.LyricsViewModel
 import com.example.yoomusic.data.SongPositionManager
 import com.example.yoomusic.databinding.ActivityMusicPlayerBinding

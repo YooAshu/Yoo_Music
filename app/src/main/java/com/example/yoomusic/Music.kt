@@ -1,12 +1,8 @@
 package com.example.yoomusic
 
-import android.content.res.Resources
 import android.media.MediaMetadataRetriever
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 import java.util.concurrent.TimeUnit
 

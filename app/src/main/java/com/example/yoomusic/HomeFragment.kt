@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -22,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.yoomusic.databinding.FragmentHomeBinding
 import com.google.gson.GsonBuilder
 import java.io.File
-import kotlin.text.set
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class LyricsViewModel(application: Application) : AndroidViewModel(application) {
     private val lyricsCacheDao = LyricsDatabase.getDatabase(application).lyricsCacheDao()
+    private val repository = LyricsRepository()
 
     private val _lyricsState = MutableStateFlow<LyricsUiState>(LyricsUiState.Idle)
     val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
@@ -22,9 +23,13 @@ class LyricsViewModel(application: Application) : AndroidViewModel(application) 
     private val _songPosition = MutableStateFlow(0)
     val songPosition: StateFlow<Int> = _songPosition.asStateFlow()
 
+    private val _searchResults = MutableStateFlow<List<LrcLibResponse>>(emptyList())
+    val searchResults: StateFlow<List<LrcLibResponse>> = _searchResults.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     init {
-        // Observe SongPositionManager changes
         viewModelScope.launch {
             SongPositionManager.songPosition.collect { position ->
                 updateSongPosition(position)
@@ -32,10 +37,8 @@ class LyricsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-
     fun updateSongPosition(position: Int) {
         _songPosition.value = position
-//        loadLyricsFromCache(musicId = MusicPlayer.musicListPA[position].id)
     }
 
     fun setLyricsStateToIdle() {
@@ -63,57 +66,21 @@ class LyricsViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _lyricsState.value = LyricsUiState.Loading
 
-            // Check cache first
             val cachedLyrics = lyricsCacheDao.getLyricsByMusicId(musicId)
             if (cachedLyrics != null) {
-                // Parse cached string to List<LyricLine>
                 val parsedLyrics = LrcParser.parse(cachedLyrics)
                 _lyricsState.value = LyricsUiState.Success(parsedLyrics)
                 return@launch
             }
 
-            // If not in cache, fetch from API
             try {
-                val result = LyricsRepository().searchLyrics(title)
+                val result = repository.searchLyrics(title)
                 result.onSuccess { lyricsResult ->
                     if (lyricsResult == null) {
                         _lyricsState.value = LyricsUiState.NotFound
                         return@launch
                     }
-
-                    // Parse synced lyrics if available
-                    if (!lyricsResult.syncedLyrics.isNullOrBlank()) {
-                        val parsed = LrcParser.parse(lyricsResult.syncedLyrics)
-                        // Save to cache as string
-                        lyricsCacheDao.insertLyrics(
-                            LyricsCache(
-                                musicId = musicId,
-                                lyricsContent = lyricsResult.syncedLyrics
-                            )
-                        )
-                        _lyricsState.value = LyricsUiState.Success(parsed)
-                        return@launch
-                    }
-
-                    // If only plain lyrics exist → split into lines
-                    if (!lyricsResult.plainLyrics.isNullOrBlank()) {
-                        val lines = lyricsResult.plainLyrics
-                            .lines()
-                            .filter { it.isNotBlank() }
-                            .map { LyricLine(timestampMs = 0L, text = it) }
-
-                        // Save plain lyrics to cache
-                        lyricsCacheDao.insertLyrics(
-                            LyricsCache(
-                                musicId = musicId,
-                                lyricsContent = lyricsResult.plainLyrics
-                            )
-                        )
-                        _lyricsState.value = LyricsUiState.Success(lines)
-                        return@launch
-                    }
-
-                    _lyricsState.value = LyricsUiState.NotFound
+                    saveLyricsToCache(lyricsResult, musicId)
                 }
                 result.onFailure { error ->
                     _lyricsState.value = LyricsUiState.Error(
@@ -124,6 +91,66 @@ class LyricsViewModel(application: Application) : AndroidViewModel(application) 
                 _lyricsState.value = LyricsUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun searchLyricsManually(query: String) {
+        viewModelScope.launch {
+            _isSearching.value = true
+            try {
+                val result = repository.searchLyricsMultiple(query)
+                result.onSuccess { results ->
+                    _searchResults.value = results
+                }
+                result.onFailure { error ->
+                    _searchResults.value = emptyList()
+                    Log.e("searchLyricsManually", error.message ?: "Unknown error")
+                }
+            } catch (e: Exception) {
+                _searchResults.value = emptyList()
+                Log.e("searchLyricsManually", e.message ?: "Unknown error")
+            } finally {
+                _isSearching.value = false
+            }
+        }
+    }
+
+    fun selectAndSaveLyrics(lrcLibResponse: LrcLibResponse, musicId: String) {
+        viewModelScope.launch {
+            saveLyricsToCache(lrcLibResponse, musicId)
+            _searchResults.value = emptyList()
+        }
+    }
+
+    private suspend fun saveLyricsToCache(lyricsResult: LrcLibResponse, musicId: String) {
+        if (!lyricsResult.syncedLyrics.isNullOrBlank()) {
+            val parsed = LrcParser.parse(lyricsResult.syncedLyrics)
+            lyricsCacheDao.insertLyrics(
+                LyricsCache(
+                    musicId = musicId,
+                    lyricsContent = lyricsResult.syncedLyrics
+                )
+            )
+            _lyricsState.value = LyricsUiState.Success(parsed)
+            return
+        }
+
+        if (!lyricsResult.plainLyrics.isNullOrBlank()) {
+            val lines = lyricsResult.plainLyrics
+                .lines()
+                .filter { it.isNotBlank() }
+                .map { LyricLine(timestampMs = 0L, text = it) }
+
+            lyricsCacheDao.insertLyrics(
+                LyricsCache(
+                    musicId = musicId,
+                    lyricsContent = lyricsResult.plainLyrics
+                )
+            )
+            _lyricsState.value = LyricsUiState.Success(lines)
+            return
+        }
+
+        _lyricsState.value = LyricsUiState.NotFound
     }
 
     fun updateCurrentPosition(currentMs: Long) {
@@ -137,6 +164,11 @@ class LyricsViewModel(application: Application) : AndroidViewModel(application) 
     fun updateCurrentLineIndex(index: Int) {
         _currentLineIndex.value = index
     }
+
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
+
 }
 
 sealed class LyricsUiState {
