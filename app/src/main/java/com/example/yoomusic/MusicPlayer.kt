@@ -28,6 +28,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.yoomusic.composables.LyricsPanel
 import com.example.yoomusic.composables.LyricsPlaceholderScreen
 import com.example.yoomusic.data.LyricsViewModel
+import com.example.yoomusic.data.SongPositionManager
 import com.example.yoomusic.databinding.ActivityMusicPlayerBinding
 import com.google.gson.GsonBuilder
 
@@ -317,13 +318,14 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         }
 
 
+
     }
 
 
     //    check here for shuffle problrm
     private fun init() {
         songPosition = intent.getIntExtra("index", 0)
-
+        SongPositionManager.updateSongPosition(songPosition)
         when (intent.getStringExtra("class")) {
             "MusicAdapter" -> {
                 val intent = Intent(this, MusicService::class.java)
@@ -341,6 +343,9 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
 
                 }
                 updateLayout()
+
+
+
             }
 
             "HomeFragment" -> {
@@ -454,7 +459,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             }
         }
 
-        Log.d("de", musicListPA[songPosition].toString())
+        Log.d("debuglog", musicListPA[songPosition].toString())
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -498,7 +503,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         }
 
 
-        lyricsViewModel.updateSongPosition(songPosition)
+        SongPositionManager.updateSongPosition(songPosition)
         if (isPlaying) {
             createMediaPlayer(playState = true)
         } else {
@@ -507,7 +512,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
 
         updateLayout()
 
-        lyricsViewModel.setLyricsStateToIdle()
+//        lyricsViewModel.setLyricsStateToIdle()
 
 
     }
@@ -521,7 +526,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
             songPosition--
         }
 
-        lyricsViewModel.updateSongPosition(songPosition)
+        SongPositionManager.updateSongPosition(songPosition)
 
 
         if (isPlaying) {
@@ -531,7 +536,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
         }
         updateLayout()
 
-        lyricsViewModel.setLyricsStateToIdle()
+//        lyricsViewModel.setLyricsStateToIdle()
 
     }
 
@@ -606,7 +611,7 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
 
 
             NowPlaying.binding.nameNP.text = musicListPA[songPosition].title
-
+            SongPositionManager.updateSongPosition(songPosition)
 
         } catch (e: Exception) {
             Log.d("Error", e.toString())
@@ -704,7 +709,9 @@ class MusicPlayer : AppCompatActivity(), ServiceConnection, MediaPlayer.OnComple
 
         // Hide lyrics
         binding.lyricsContainer.visibility = View.GONE
+
     }
+
 
 
 

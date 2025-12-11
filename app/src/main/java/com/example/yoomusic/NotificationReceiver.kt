@@ -3,9 +3,11 @@ package com.example.yoomusic
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.yoomusic.data.SongPositionManager
 
 class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -56,6 +58,9 @@ class NotificationReceiver : BroadcastReceiver() {
         } else {
             MusicPlayer.musicService!!.createMediaPlayer(playState = false)
         }
+
+        Log.d("Not","changed")
+        SongPositionManager.updateSongPosition(position = MusicPlayer.songPosition)
     }
     private fun prevSong(context: Context) {
 
@@ -73,6 +78,9 @@ class NotificationReceiver : BroadcastReceiver() {
         } else {
             MusicPlayer.musicService!!.createMediaPlayer(playState = false)
         }
+        Log.d("Not","changed")
+        SongPositionManager.updateSongPosition(position = MusicPlayer.songPosition)
+
     }
 
 

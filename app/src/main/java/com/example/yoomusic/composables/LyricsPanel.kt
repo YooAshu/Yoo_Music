@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.yoomusic.MusicPlayer
 import com.example.yoomusic.MusicPlayer.Companion.musicListPA
 import com.example.yoomusic.data.LyricsUiState
@@ -36,6 +38,18 @@ fun LyricsPanel(
         MusicPlayer.musicListPA[songPosition].title
     } else {
         "Unknown"
+    }
+
+    val musicId = if (songPosition < MusicPlayer.musicListPA.size) {
+        MusicPlayer.musicListPA[songPosition].id
+    } else {
+        ""
+    }
+
+    LaunchedEffect(songPosition) {
+        viewModel.loadLyricsFromCache(musicId = musicId)
+        viewModel.setLyricsStateToIdle()
+        viewModel.updateCurrentLineIndex(0)
     }
 
     Column(
@@ -60,7 +74,7 @@ fun LyricsPanel(
             LyricsUiState.Idle -> {
                 Text("No lyrics found", color = Color.White)
                 Button(
-                    onClick = { viewModel.fetchLyrics(title) },
+                    onClick = { viewModel.fetchLyrics(title, musicId) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF9D00FF),
                         contentColor = Color.White
@@ -98,7 +112,7 @@ fun LyricsPanel(
                     color = Color.LightGray
                 )
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = { viewModel.fetchLyrics(title) }) {
+                Button(onClick = { viewModel.fetchLyrics(title, musicId) }) {
                     Text("Try again")
                 }
             }
@@ -109,7 +123,7 @@ fun LyricsPanel(
                     color = Color.Red
                 )
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = { viewModel.fetchLyrics(title) }) {
+                Button(onClick = { viewModel.fetchLyrics(title, musicId) }) {
                     Text("Retry")
                 }
             }
